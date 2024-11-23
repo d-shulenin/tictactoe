@@ -7,7 +7,31 @@ datasource db {
   url      = env("DATABASE_URL") //TODO: add envalid
 }
 
+enum GameStatus {
+  idle
+  inProgress
+  over
+}
+
 model Game {
-  id String @id @default(cuid())
-  name String
+  id        String     @id @default(cuid())
+  name      String
+  createdAt DateTime   @default(now())
+  startedAt DateTime
+  overAt    DateTime
+  status    GameStatus
+  isDraw    Boolean
+  host      User       @relation("GameHost", fields: [hostId], references: [id])
+  guest     User       @relation("GameGuest", fields: [guestId], references: [id])
+
+  hostId  String @unique
+  guestId String @unique
+}
+
+model User {
+  id           String @id @default(cuid())
+  login        String @unique
+  passwordHash String
+  gamesAsHost  Game[] @relation("GameHost")
+  gamesAsGuest Game[] @relation("GameGuest")
 }

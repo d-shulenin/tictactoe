@@ -1,9 +1,9 @@
-import { Button } from "@/shared/ui/button";
+import { GamesList } from "@/features/GamesList";
 
 export default function Home() {
   return (
     <div>
-      <Button>Hello</Button>
+      <GamesList />
     </div>
   );
 }

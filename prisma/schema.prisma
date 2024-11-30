@@ -17,15 +17,18 @@ model Game {
   id        String     @id @default(cuid())
   name      String
   createdAt DateTime   @default(now())
-  startedAt DateTime
-  overAt    DateTime
+  startedAt DateTime?
+  overAt    DateTime?
   status    GameStatus
-  isDraw    Boolean
+  isDraw    Boolean?
   host      User       @relation("GameHost", fields: [hostId], references: [id])
-  guest     User       @relation("GameGuest", fields: [guestId], references: [id])
+  guest     User?      @relation("GameGuest", fields: [guestId], references: [id])
+  winner    User?      @relation("GameWinner", fields: [winnerId], references: [id])
+  grid      Json
 
-  hostId  String @unique
-  guestId String @unique
+  hostId   String  @unique
+  guestId  String? @unique
+  winnerId String? @unique
 }
 
 model User {
@@ -34,4 +37,5 @@ model User {
   passwordHash String
   gamesAsHost  Game[] @relation("GameHost")
   gamesAsGuest Game[] @relation("GameGuest")
+  winningGames Game[] @relation("GameWinner")
 }

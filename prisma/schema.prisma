@@ -26,9 +26,9 @@ model Game {
   winner    User?      @relation("GameWinner", fields: [winnerId], references: [id])
   grid      Json
 
-  hostId   String  @unique
-  guestId  String? @unique
-  winnerId String? @unique
+  hostId   String
+  guestId  String?
+  winnerId String?
 }
 
 model User {

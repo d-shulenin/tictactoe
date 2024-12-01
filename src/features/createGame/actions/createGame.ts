@@ -3,6 +3,7 @@
 import { stringSchema } from "@/shared/lib/validation";
 import { gameService } from "@/entities/game";
 import { ValidationError, ApiError } from "@/shared/lib/errors";
+import { redirect } from "next/navigation";
 
 export async function createGameAction(prevState: unknown, formData: FormData) {
   const name = formData.get("name");
@@ -14,11 +15,17 @@ export async function createGameAction(prevState: unknown, formData: FormData) {
     };
   }
 
+  let newGameId;
+
   try {
-    return await gameService.create(nameValidation.data);
+    const { id } = await gameService.create(nameValidation.data);
+    newGameId = id;
   } catch (e) {
+    console.dir(e);
     return {
       error: new ApiError("Failed to create new game"),
     };
   }
+
+  redirect(`/game/${newGameId}`);
 }

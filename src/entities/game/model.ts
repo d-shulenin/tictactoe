@@ -25,6 +25,7 @@ interface GameBase {
   name: string;
   host: User;
   grid: Grid;
+  createdAt: Date;
 }
 
 interface GameIdle extends GameBase {
@@ -48,8 +49,8 @@ interface GameOver extends GameBase {
 
 type Game = GameIdle | GameInProgress | GameOver;
 
-interface CreateGamePayload {
-  name: string;
+interface CreateGamePayload
+  extends Omit<GameIdle, "id" | "createdAt" | "host"> {
   hostId: UserId;
 }
 

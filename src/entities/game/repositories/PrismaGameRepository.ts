@@ -8,7 +8,6 @@ import {
 import { z, ZodType } from "zod";
 import {
   CreateGamePayload,
-  DEFAULT_GRID,
   type Game,
   type GameIdle,
   GameInProgress,
@@ -29,46 +28,80 @@ const gridSchema = z.array(z.union([z.nativeEnum(Symbol), z.null()]));
 const dateSchema = z.date();
 const booleanSchema = z.boolean();
 
-const mapDbGameToGame = (
-  game: PrismaGame & { host: PrismaUser; guest: PrismaUser | null }
-): Game => {
-  const host = game.host;
-  const { id, name, grid, isDraw, winnerId, startedAt, overAt, guest } = game;
+//TODO: create mappers.ts
+const mapDbGameToGameIdle = (
+  game: PrismaGame & { host: PrismaUser }
+): GameIdle => {
+  const { id, name, createdAt, host, grid } = game;
+  return {
+    id,
+    name,
+    host,
+    createdAt,
+    status: GameStatus.IDLE,
+    grid: gridSchema.parse(grid),
+  };
+};
 
-  switch (game.status) {
+const mapDbGameToGameInProgress = (
+  game: PrismaGame & { host: PrismaUser; guest: PrismaUser | null }
+): GameInProgress => {
+  const { id, name, createdAt, host, grid, startedAt, guest } = game;
+  return {
+    id,
+    name,
+    host,
+    createdAt,
+    startedAt: dateSchema.parse(startedAt),
+    guest: userSchema.parse(guest),
+    grid: gridSchema.parse(grid),
+    status: GameStatus.IN_PROGRESS,
+  };
+};
+
+const mapDbGameToGameOver = (
+  game: PrismaGame & { host: PrismaUser; guest: PrismaUser | null }
+): GameOver => {
+  const {
+    id,
+    name,
+    createdAt,
+    host,
+    grid,
+    startedAt,
+    guest,
+    isDraw,
+    winnerId,
+    overAt,
+  } = game;
+
+  return {
+    id,
+    name,
+    host,
+    createdAt,
+    winnerId,
+    isDraw: booleanSchema.parse(isDraw),
+    startedAt: dateSchema.parse(startedAt),
+    overAt: dateSchema.parse(overAt),
+    guest: userSchema.parse(guest),
+    grid: gridSchema.parse(grid),
+    status: GameStatus.OVER,
+  };
+};
+
+const mapDbGameToGame = (
+  dbGame: PrismaGame & { host: PrismaUser; guest: PrismaUser | null }
+): Game => {
+  switch (dbGame.status) {
     case "idle":
-      return {
-        id,
-        name,
-        host,
-        status: GameStatus.IDLE,
-        grid: gridSchema.parse(grid),
-      } satisfies GameIdle;
+      return mapDbGameToGameIdle(dbGame);
 
     case "inProgress":
-      return {
-        id,
-        name,
-        host,
-        status: GameStatus.IN_PROGRESS,
-        guest: userSchema.parse(guest),
-        startedAt: dateSchema.parse(startedAt),
-        grid: gridSchema.parse(grid),
-      } satisfies GameInProgress;
+      return mapDbGameToGameInProgress(dbGame);
 
     case "over":
-      return {
-        id,
-        name,
-        winnerId,
-        host,
-        status: GameStatus.OVER,
-        isDraw: booleanSchema.parse(isDraw),
-        guest: userSchema.parse(game.guest),
-        startedAt: dateSchema.parse(startedAt),
-        overAt: dateSchema.parse(overAt),
-        grid: gridSchema.parse(grid),
-      } satisfies GameOver;
+      return mapDbGameToGameOver(dbGame);
   }
 };
 
@@ -82,14 +115,12 @@ export class PrismaGameRepository implements GameRepository {
     return allGames.map(mapDbGameToGame);
   }
 
-  async create({ name, hostId }: CreateGamePayload) {
-    await prisma.game.create({
-      data: {
-        name,
-        hostId,
-        status: GameStatus.IDLE,
-        grid: DEFAULT_GRID,
-      },
+  async create(payload: CreateGamePayload) {
+    const newDbGame = await prisma.game.create({
+      data: payload,
+      include: { host: true },
     });
+
+    return mapDbGameToGameIdle(newDbGame);
   }
 }

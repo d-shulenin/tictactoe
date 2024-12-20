@@ -23,7 +23,7 @@ export function CreateGameForm() {
   return (
     <form action={formAction}>
       <Input name="name" />
-      <Button aria-disabled={isPending}>Submit</Button>
+      <Button disabled={isPending}>Submit</Button>
     </form>
   );
 }

@@ -1,13 +1,16 @@
-export class ValidationError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "ValidationError";
-  }
-}
-
 export class ApiError extends Error {
-  constructor(message: string) {
+  status;
+
+  constructor(status: number, message: string) {
     super(message);
-    this.name = "ApiError";
+    this.status = status;
+  }
+
+  static UnauthorizedError() {
+    return new ApiError(401, "User is not authorized");
+  }
+
+  static BadRequest(message: string) {
+    return new ApiError(400, message);
   }
 }

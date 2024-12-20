@@ -2,7 +2,6 @@
 
 import { stringSchema } from "@/shared/lib/validation";
 import { gameService } from "@/entities/game";
-import { ValidationError, ApiError } from "@/shared/lib/errors";
 import { redirect } from "next/navigation";
 
 export async function createGameAction(prevState: unknown, formData: FormData) {
@@ -11,7 +10,7 @@ export async function createGameAction(prevState: unknown, formData: FormData) {
 
   if (!nameValidation.success) {
     return {
-      error: new ValidationError("Game name must be at least 1 character"),
+      error: nameValidation.error, //TODO: change error because of bad message format
     };
   }
 
@@ -20,10 +19,10 @@ export async function createGameAction(prevState: unknown, formData: FormData) {
   try {
     const { id } = await gameService.create(nameValidation.data);
     newGameId = id;
-  } catch (e) {
-    console.dir(e);
+  } catch (error) {
     return {
-      error: new ApiError("Failed to create new game"),
+      error:
+        error instanceof Error ? error : new Error("Failed to create new game"),
     };
   }
 

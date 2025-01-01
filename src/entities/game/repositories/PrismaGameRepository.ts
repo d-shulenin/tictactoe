@@ -17,6 +17,7 @@ import {
 } from "../model";
 import { type User } from "@/entities/user/@x/game";
 import { booleanSchema, dateSchema } from "@/shared/lib/validation";
+import { ApiError } from "@/shared/lib/errors";
 
 //TODO: process validation failure, fx ErrorBoundary
 const userSchema: ZodType<User> = z.object({
@@ -120,5 +121,16 @@ export class PrismaGameRepository implements GameRepository {
     });
 
     return mapDbGameToGameIdle(newDbGame);
+  }
+
+  async findById(id: string) {
+    const dbGame = await prisma.game.findUnique({
+      where: { id },
+      include: { guest: true, host: true },
+    });
+
+    if (!dbGame) throw ApiError.BadRequest("Game was not found");
+
+    return mapDbGameToGame(dbGame);
   }
 }

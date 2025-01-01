@@ -1,2 +1,2 @@
 export { gameService } from "./service";
-export { GameStatus, DEFAULT_GRID } from "./model";
+export { GameStatus, DEFAULT_GRID, type Game } from "./model";

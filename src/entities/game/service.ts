@@ -1,3 +1,5 @@
+import { ApiError } from "@/shared/lib/errors";
+import { SessionService } from "../session";
 import { CreateGamePayload, DEFAULT_GRID, GameStatus } from "./model";
 import { GameRepository } from "./repositories/IGameRepository";
 import { PrismaGameRepository } from "./repositories/PrismaGameRepository";
@@ -9,15 +11,23 @@ class GameService {
     return this.gameRepository.getAllByStatus(status);
   }
 
-  create(name: string) {
+  async create(name: string) {
+    const { userId } = await SessionService.verifySession(); //FIXME: maybe store userId, not request it
+
+    if (!userId) throw ApiError.UnauthorizedError();
+
     const payload: CreateGamePayload = {
       name,
-      hostId: "1", //TODO: get hostId from userService
+      hostId: userId,
       status: GameStatus.IDLE,
       grid: DEFAULT_GRID,
     };
 
     return this.gameRepository.create(payload);
+  }
+
+  findById(id: string) {
+    return this.gameRepository.findById(id);
   }
 }
 

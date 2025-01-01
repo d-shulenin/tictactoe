@@ -8,6 +8,6 @@ export class PrismaUserRepository implements UserRepository {
   }
 
   async findByLogin(login: string) {
-    return await prisma.user.findUniqueOrThrow({ where: { login } });
+    return await prisma.user.findUnique({ where: { login } });
   }
 }

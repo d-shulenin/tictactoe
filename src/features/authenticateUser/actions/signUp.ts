@@ -1,6 +1,8 @@
 "use server";
 
+import { Session } from "@/entities/session";
 import { userService } from "@/entities/user/service";
+import { redirect } from "next/navigation";
 import { z } from "zod";
 
 const signUpSchema = z.object({
@@ -34,13 +36,13 @@ export async function signUp(prevState: unknown, formData: FormData) {
   const { login, password } = dataValidation.data;
 
   try {
-    await userService.create(login, password);
+    const user = await userService.create(login, password);
+    await Session.createSession(user.id);
   } catch (error) {
     return {
-      error:
-        error instanceof Error ? error : new Error("Failed to create user"),
+      error: error instanceof Error ? error : new Error("Failed to sign up"),
     };
   }
 
-  return;
+  redirect("/");
 }

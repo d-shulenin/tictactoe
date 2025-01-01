@@ -13,10 +13,11 @@ import {
   CardTitle,
 } from "@/shared/ui/card";
 import { useRouter } from "next/navigation";
-import { signUp } from "../actions/signUp";
+import { signIn } from "../actions/signIn";
+import { AlertCircle } from "lucide-react";
 
 export function SignInForm() {
-  const [state, formAction, isPending] = useActionState(signUp, null);
+  const [state, formAction, isPending] = useActionState(signIn, null);
   const router = useRouter();
 
   return (
@@ -26,7 +27,7 @@ export function SignInForm() {
         <CardDescription>Enter your credentials to login</CardDescription>
       </CardHeader>
       <CardContent>
-        <form>
+        <form action={formAction}>
           <div className="grid w-full items-center gap-4">
             <div className="flex flex-col space-y-1.5">
               <Label htmlFor="login">Login</Label>
@@ -37,23 +38,34 @@ export function SignInForm() {
                 placeholder="Enter your login"
                 required
               />
+              {state?.errors?.login && (
+                <p className="text-sm text-red-500 mt-1">
+                  {state.errors.login}
+                </p>
+              )}
             </div>
             <div className="flex flex-col space-y-1.5">
               <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
+                name="password"
                 type="password"
                 placeholder="Enter your password"
                 required
               />
+              {state?.errors?.password && (
+                <p className="text-sm text-red-500 mt-1">
+                  {state.errors.password}
+                </p>
+              )}
             </div>
           </div>
-          {/* {error && (
+          {Boolean(state?.error) && (
             <div className="flex items-center gap-2 mt-4 text-red-500">
               <AlertCircle size={16} />
-              <span className="text-sm">{error}</span>
+              <span className="text-sm">{state?.error?.message}</span>
             </div>
-          )} */}
+          )}
           <Button className="w-full mt-6" disabled={isPending}>
             Login
           </Button>
@@ -61,7 +73,7 @@ export function SignInForm() {
       </CardContent>
       <CardFooter className="flex justify-center">
         <Button variant="link" onClick={() => router.push("/sign-up")}>
-          Don't have an account? Sign Up
+          Don&apos;t have an account? Sign Up
         </Button>
       </CardFooter>
     </Card>

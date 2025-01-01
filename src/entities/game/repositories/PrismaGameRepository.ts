@@ -16,6 +16,7 @@ import {
   Symbol,
 } from "../model";
 import { type User } from "@/entities/user/@x/game";
+import { booleanSchema, dateSchema } from "@/shared/lib/validation";
 
 //TODO: process validation failure, fx ErrorBoundary
 const userSchema: ZodType<User> = z.object({
@@ -24,9 +25,6 @@ const userSchema: ZodType<User> = z.object({
   passwordHash: z.string(),
 });
 const gridSchema = z.array(z.union([z.nativeEnum(Symbol), z.null()]));
-//TODO: move to shared
-const dateSchema = z.date();
-const booleanSchema = z.boolean();
 
 //TODO: create mappers.ts
 const mapDbGameToGameIdle = (

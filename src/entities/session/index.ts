@@ -1,1 +1,1 @@
-export { Session } from "./service";
+export { SessionService } from "./service";

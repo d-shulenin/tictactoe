@@ -1,11 +1,10 @@
 import { cookies } from "next/headers";
-import { Token } from "../token/@x/session";
-import { redirect } from "next/navigation";
+import { TokenService } from "../token/@x/session";
 
-export class Session {
+export class SessionService {
   static async createSession(userId: string) {
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-    const session = await Token.encrypt({ userId, expiresAt });
+    const session = await TokenService.encrypt({ userId, expiresAt });
     const cookieStore = await cookies();
     cookieStore.set("session", session, {
       httpOnly: true,
@@ -18,7 +17,7 @@ export class Session {
 
   static async updateSession() {
     const session = (await cookies()).get("session")?.value;
-    const payload = await Token.decrypt(session);
+    const payload = await TokenService.decrypt(session);
     if (!session || !payload) {
       return null;
     }
@@ -43,10 +42,8 @@ export class Session {
 
   static async verifySession() {
     const cookie = (await cookies()).get("session")?.value;
-    const session = await Token.decrypt(cookie);
-    if (!session?.userId) {
-      redirect("/login");
-    }
-    return { isAuth: true, userId: session.userId };
+    const session = await TokenService.decrypt(cookie);
+
+    return { isAuth: Boolean(session), userId: session?.userId };
   }
 }

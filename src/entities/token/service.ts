@@ -3,7 +3,7 @@ import { JWTPayload, SignJWT, jwtVerify } from "jose";
 const secretKey = process.env.SESSION_SECRET;
 const encodedKey = new TextEncoder().encode(secretKey);
 
-export class Token {
+export class TokenService {
   static async encrypt(payload: JWTPayload) {
     return new SignJWT(payload)
       .setProtectedHeader({ alg: "HS256" })

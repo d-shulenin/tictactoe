@@ -1,6 +1,5 @@
-import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
-import { Token } from "@/entities/token";
+import { SessionService } from "./entities/session";
 
 // 1. Specify public routes
 const publicRoutes = ["/sign-in", "/sign-up"];
@@ -10,12 +9,11 @@ export default async function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
   const isProtectedRoute = !publicRoutes.includes(path);
 
-  // 3. Decrypt the session from the cookie
-  const cookie = (await cookies()).get("session")?.value;
-  const session = await Token.decrypt(cookie);
+  // 3. Verify session
+  const { isAuth } = await SessionService.verifySession();
 
   // 4. Redirect to /sign-in if the user is not authenticated
-  if (isProtectedRoute && !session?.userId) {
+  if (isProtectedRoute && !isAuth) {
     return NextResponse.redirect(new URL("/sign-in", req.nextUrl));
   }
 

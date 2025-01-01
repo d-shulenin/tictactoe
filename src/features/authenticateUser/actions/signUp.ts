@@ -1,6 +1,6 @@
 "use server";
 
-import { Session } from "@/entities/session";
+import { SessionService } from "@/entities/session";
 import { userService } from "@/entities/user/service";
 import { redirect } from "next/navigation";
 import { z } from "zod";
@@ -37,7 +37,7 @@ export async function signUp(prevState: unknown, formData: FormData) {
 
   try {
     const user = await userService.create(login, password);
-    await Session.createSession(user.id);
+    await SessionService.createSession(user.id);
   } catch (error) {
     return {
       error: error instanceof Error ? error : new Error("Failed to sign up"),

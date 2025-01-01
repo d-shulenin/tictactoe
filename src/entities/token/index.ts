@@ -1,1 +1,1 @@
-export { Token } from "./service";
+export { TokenService } from "./service";
